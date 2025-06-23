@@ -111,13 +111,10 @@ Token Lexer::next_token()
           return {TokenType::Identifier, ident, token_line, token_col};
      }
 
-     if (std::isdigit(c) || (c == '-' && std::isdigit(source[pos + 1])))
+     if (std::isdigit(c) )
      {
           std::string number;
           bool has_dot = false;
-
-          if (peek() == '-')
-               number += get();
 
           while (std::isdigit(peek()) || (peek() == '.' && !has_dot))
           {
