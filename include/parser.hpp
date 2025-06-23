@@ -16,8 +16,42 @@ enum class NodeType
      String,
      Boolean,
      BinaryOp,
-     Assignment
+     Assignment,
+     ParamList,
+     ForLoop,
+     While,
 };
+
+inline std::string to_string(NodeType type)
+{
+     switch (type)
+     {
+     case NodeType::FunctionDecl:
+          return "FunctionDecl";
+     case NodeType::FunctionCall:
+          return "FunctionCall";
+     case NodeType::Return:
+          return "Return";
+     case NodeType::If:
+          return "If";
+     case NodeType::For:
+          return "For";
+     case NodeType::Identifier:
+          return "Identifier";
+     case NodeType::Number:
+          return "Number";
+     case NodeType::String:
+          return "String";
+     case NodeType::Boolean:
+          return "Boolean";
+     case NodeType::BinaryOp:
+          return "BinaryOp";
+     case NodeType::Assignment:
+          return "Assignment";
+     default:
+          return "Unknown";
+     }
+}
 
 struct ASTNode
 {
