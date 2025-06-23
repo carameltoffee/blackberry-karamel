@@ -82,17 +82,15 @@ int main()
     return (x+y)*2;
 )
 
-fn do_silly(word: str) (
-    for (i=43) (
-        if (i==42) (
-            cout('42!!');
-        )
-        cout(word);
+fn fib(n: num) (
+    if (n < 2) (
+        return n;
     )
+    return fib(n-1) + fib(n-2);
 )
 
-mul_nums(-3, 2);
-do_silly('im silly');
+cout(fib(5));
+
 )";
 
      Lexer lexer(code);
