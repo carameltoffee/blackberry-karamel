@@ -51,6 +51,8 @@ std::string node_type_to_string(NodeType type)
           return "Boolean";
      case NodeType::BinaryOp:
           return "BinaryOp";
+     case NodeType::ParamList:
+          return "ParamList";
      default:
           return "???";
      }
@@ -59,12 +61,13 @@ std::string node_type_to_string(NodeType type)
 void print_ast(const std::shared_ptr<ASTNode> &node, int indent = 0)
 {
      std::string ind(indent * 2, ' ');
-     std::cout << ind << "Node: " << node->value << " (type " << node_type_to_string(node->type) << ")\n";
+     std::cout << ind << "Node: " << node->value << " type: (" + node_type_to_string(node->type) + ")\n";
      for (const auto &child : node->children)
      {
           print_ast(child, indent + 1);
      }
 }
+
 
 std::vector<std::shared_ptr<ASTNode>> Parser::parse()
 {
@@ -72,6 +75,7 @@ std::vector<std::shared_ptr<ASTNode>> Parser::parse()
      while (!match(TokenType::EndOfFile))
      {
           auto node = parse_statement();
+          // print_ast(node);
           nodes.push_back(node);
      }
      return nodes;
@@ -81,23 +85,6 @@ std::shared_ptr<ASTNode> Parser::parse_statement()
      if (match(TokenType::Function))
      {
           return parse_function_decl();
-     }
-     if (match(TokenType::Identifier))
-     {
-          auto expr = parse_expression();
-
-          if (expr->type == NodeType::Identifier && match(TokenType::Operator, "="))
-          {
-               advance();
-               auto assign = std::make_shared<ASTNode>(NodeType::Assignment, "=");
-               assign->children.push_back(expr);
-               assign->children.push_back(parse_expression());
-               expect(TokenType::Punctuation, ";");
-               return assign;
-          }
-
-          expect(TokenType::Punctuation, ";");
-          return expr;
      }
 
      if (match(TokenType::Return))
@@ -109,16 +96,48 @@ std::shared_ptr<ASTNode> Parser::parse_statement()
           return node;
      }
 
-     if (match(TokenType::If) || match(TokenType::For))
+     if (match(TokenType::If))
      {
-          auto kind = match(TokenType::If) ? NodeType::If : NodeType::For;
-          auto node = std::make_shared<ASTNode>(kind, current.value);
+          auto node = std::make_shared<ASTNode>(NodeType::If, current.value);
           advance();
           expect(TokenType::Punctuation, "(");
           node->children.push_back(parse_expression());
           expect(TokenType::Punctuation, ")");
           node->children.push_back(parse_block());
           return node;
+     }
+
+     if (match(TokenType::For))
+     {
+          advance();
+          expect(TokenType::Punctuation, "(");
+
+          auto for_node = std::make_shared<ASTNode>(NodeType::For, "for");
+
+          auto first_expr = parse_expression();
+
+          if (match(TokenType::Punctuation, ";"))
+          {
+               advance();
+               auto second_expr = parse_expression();
+
+               auto loop = std::make_shared<ASTNode>(NodeType::ForLoop, "loop");
+               loop->children.push_back(first_expr);
+               loop->children.push_back(second_expr);
+
+               for_node->children.push_back(loop);
+          }
+          else
+          {
+               auto cond = std::make_shared<ASTNode>(NodeType::While, "while");
+               cond->children.push_back(first_expr);
+               for_node->children.push_back(cond);
+          }
+
+          expect(TokenType::Punctuation, ")");
+          for_node->children.push_back(parse_block());
+
+          return for_node;
      }
 
      auto expr = parse_expression();
@@ -131,10 +150,12 @@ std::shared_ptr<ASTNode> Parser::parse_function_decl()
      expect(TokenType::Function);
      std::string name = current.value;
      expect(TokenType::Identifier);
+
      auto func = std::make_shared<ASTNode>(NodeType::FunctionDecl, name);
 
      expect(TokenType::Punctuation, "(");
 
+     auto param_list = std::make_shared<ASTNode>(NodeType::ParamList, "");
      if (!match(TokenType::Punctuation, ")"))
      {
           while (true)
@@ -144,7 +165,9 @@ std::shared_ptr<ASTNode> Parser::parse_function_decl()
                expect(TokenType::OfType);
                std::string type = current.value;
                expect(TokenType::Type);
-               func->children.push_back(std::make_shared<ASTNode>(NodeType::Identifier, param_name + ":" + type));
+
+               param_list->children.push_back(
+                   std::make_shared<ASTNode>(NodeType::Identifier, param_name));
 
                if (match(TokenType::Punctuation, ","))
                {
@@ -162,14 +185,17 @@ std::shared_ptr<ASTNode> Parser::parse_function_decl()
      }
 
      expect(TokenType::Punctuation, ")");
+     func->children.push_back(param_list);
 
      if (match(TokenType::Type))
      {
-          func->children.push_back(std::make_shared<ASTNode>(NodeType::Identifier, "ret:" + current.value));
+          func->children.push_back(
+              std::make_shared<ASTNode>(NodeType::Identifier, "ret:" + current.value));
           advance();
      }
 
      func->children.push_back(parse_block());
+
      return func;
 }
 
@@ -190,6 +216,15 @@ std::shared_ptr<ASTNode> Parser::parse_block()
 std::shared_ptr<ASTNode> Parser::parse_expression()
 {
      auto left = parse_primary();
+
+     if (left->type == NodeType::Identifier && match(TokenType::Operator, "="))
+     {
+          advance();
+          auto assign = std::make_shared<ASTNode>(NodeType::Assignment, "=");
+          assign->children.push_back(left);
+          assign->children.push_back(parse_expression());
+          return assign;
+     }
 
      while (true)
      {
