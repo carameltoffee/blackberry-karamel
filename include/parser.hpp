@@ -13,6 +13,7 @@ enum class NodeType
      For,
      Identifier,
      Number,
+     DecimalNumber,
      String,
      Boolean,
      BinaryOp,

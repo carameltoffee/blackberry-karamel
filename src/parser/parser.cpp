@@ -68,7 +68,6 @@ void print_ast(const std::shared_ptr<ASTNode> &node, int indent = 0)
      }
 }
 
-
 std::vector<std::shared_ptr<ASTNode>> Parser::parse()
 {
      std::vector<std::shared_ptr<ASTNode>> nodes;
@@ -162,12 +161,16 @@ std::shared_ptr<ASTNode> Parser::parse_function_decl()
           {
                std::string param_name = current.value;
                expect(TokenType::Identifier);
+
                expect(TokenType::OfType);
+
                std::string type = current.value;
                expect(TokenType::Type);
 
+               std::string full_param = param_name + ":" + type;
+
                param_list->children.push_back(
-                   std::make_shared<ASTNode>(NodeType::Identifier, param_name));
+                   std::make_shared<ASTNode>(NodeType::Identifier, full_param));
 
                if (match(TokenType::Punctuation, ","))
                {
@@ -298,9 +301,15 @@ std::shared_ptr<ASTNode> Parser::parse_primary()
           return expr;
      }
 
-     if (match(TokenType::Integer) || match(TokenType::Float))
+     if (match(TokenType::Integer))
      {
           auto node = std::make_shared<ASTNode>(NodeType::Number, current.value);
+          advance();
+          return node;
+     }
+     if (match(TokenType::Float))
+     {
+          auto node = std::make_shared<ASTNode>(NodeType::DecimalNumber, current.value);
           advance();
           return node;
      }
