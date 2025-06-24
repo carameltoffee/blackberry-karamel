@@ -5,7 +5,6 @@ bin/
 out/
 cmake-build-debug/
 cmake-build-release/
-runner/
 
 *.out
 *.exe
