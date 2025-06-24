@@ -78,18 +78,24 @@ std::string Token::to_string() const
 
 int main()
 {
-     std::string code = R"(fn mul_nums(x: num, y: num) num (
+     std::string code = R"(fn mul_nums(x: flo, y: num) num (
     return (x+y)*2;
 )
 
-fn fib(n: num) (
-    if (n < 2) (
-        return n;
+fn fact(n: num) (
+    if (n <= 1) (
+        return 1;
     )
-    return fib(n-1) + fib(n-2);
+    return n*fact(n-1);
 )
 
-cout(fib(5));
+x = 'be';
+# x = 10;
+cout(x);
+
+cout(fact(11));
+cout(mul_nums(1.0, 2));
+# cout(10.0 / 0);
 
 )";
 
