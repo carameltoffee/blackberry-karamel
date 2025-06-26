@@ -47,12 +47,16 @@ std::string node_type_to_string(NodeType type)
           return "Number";
      case NodeType::String:
           return "String";
+     case NodeType::DecimalNumber:
+          return "DecimalNumber";
      case NodeType::Boolean:
           return "Boolean";
      case NodeType::BinaryOp:
           return "BinaryOp";
      case NodeType::ParamList:
           return "ParamList";
+     case NodeType::Array:
+          return "Array";
      default:
           return "???";
      }
@@ -243,7 +247,6 @@ std::shared_ptr<ASTNode> Parser::parse_expression()
           }
           else if (match(TokenType::Punctuation, ","))
           {
-               // advance();
                break;
           }
           else if (match(TokenType::Punctuation, ")"))
@@ -291,6 +294,26 @@ std::shared_ptr<ASTNode> Parser::parse_primary()
           }
 
           return std::make_shared<ASTNode>(NodeType::Identifier, name);
+     }
+
+     if (match(TokenType::Punctuation, "["))
+     {
+          advance();
+          auto array = std::make_shared<ASTNode>(NodeType::Array, "");
+          while (!match(TokenType::Punctuation, "]") && !match(TokenType::EndOfFile))
+          {
+               array->children.push_back(parse_expression());
+               if (match(TokenType::Punctuation, ","))
+               {
+                    advance();
+               }
+               else if (!match(TokenType::Punctuation, "]"))
+               {
+                    throw std::runtime_error("Expected ',' or ']' in array , got: " + current.to_string());
+               }
+          }
+          expect(TokenType::Punctuation, "]");
+          return array;
      }
 
      if (match(TokenType::Punctuation, "("))

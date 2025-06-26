@@ -5,7 +5,7 @@ const std::unordered_set<std::string> Lexer::control_keywords = {
     "if", "else", "for", "return"};
 
 const std::unordered_set<std::string> Lexer::types = {
-    "num", "flo", "str", "bool"};
+    "num", "flo", "str", "bool", "arr"};
 
 const std::string Lexer::function_keyword = "fn";
 

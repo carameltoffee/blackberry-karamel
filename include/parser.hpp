@@ -16,6 +16,7 @@ enum class NodeType
      DecimalNumber,
      String,
      Boolean,
+     Array,
      BinaryOp,
      Assignment,
      ParamList,

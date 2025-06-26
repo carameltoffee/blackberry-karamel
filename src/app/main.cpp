@@ -89,14 +89,15 @@ fn fact(n: num) (
     return n*fact(n-1);
 )
 
-x = 'be';
-# x = 10;
+fn silly(s: str) (
+     for(i=0; 10) (
+          cout(s);
+     )
+)
+
+x = [15, 2, 3, 4];
 cout(x);
-
-cout(fact(11));
-cout(mul_nums(1.0, 2));
-# cout(10.0 / 0);
-
+silly('mememememe');
 )";
 
      Lexer lexer(code);
