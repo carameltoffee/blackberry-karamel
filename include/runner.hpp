@@ -19,6 +19,7 @@ public:
                String,
                Bool,
                Float,
+               Array,
                None
           } type;
 
@@ -26,6 +27,7 @@ public:
           double float_val;
           std::string str_val;
           bool bool_val;
+          std::vector<Value> array_val;
 
           Value();
 
@@ -33,6 +35,7 @@ public:
           explicit Value(std::string v);
           explicit Value(bool v);
           explicit Value(double v);
+          explicit Value(std::vector<Value> v);
 
           std::string to_string() const
           {
@@ -46,6 +49,18 @@ public:
                     return bool_val ? "true" : "false";
                case Type::Float:
                     return std::to_string(float_val);
+               case Type::Array:
+               {
+                    std::string result = "[";
+                    for (size_t i = 0; i < array_val.size(); ++i)
+                    {
+                         result += array_val[i].to_string();
+                         if (i < array_val.size() - 1)
+                              result += ", ";
+                    }
+                    result += "]";
+                    return result;
+               }
                default:
                     return "none";
                }
@@ -76,6 +91,8 @@ private:
      Value eval_binary_op(const std::string &op, const Value &left, const Value &right);
      bool is_true(const Value &val);
      Value execute_block(const std::shared_ptr<ASTNode> &block);
+     Value execute_while(const std::shared_ptr<ASTNode> &expression , const std::shared_ptr<ASTNode> &body);
+     Value execute_for_loop(const std::shared_ptr<ASTNode> &body,const std::shared_ptr<ASTNode> &lim, std::string var_name);
      Value execute_function_call(const std::shared_ptr<ASTNode> &node);
 
      bool has_variable_in_current_scope(const std::string &name);

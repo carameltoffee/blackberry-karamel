@@ -28,6 +28,11 @@ Runner::Value::Value(double v)
 {
 }
 
+Runner::Value::Value(std::vector<Value> v)
+    : type(Type::Array), array_val(v)
+{
+}
+
 void Runner::interpret(const std::vector<std::shared_ptr<ASTNode>> &nodes)
 {
      scopes.clear();
@@ -51,6 +56,15 @@ Runner::Value Runner::execute(const std::shared_ptr<ASTNode> &node)
           return Value(node->value);
      case NodeType::Boolean:
           return Value(node->value == "true");
+     case NodeType::Array:
+     {
+          std::vector<Value> values;
+          for (const auto &val : node->children)
+          {
+               values.push_back(execute(val));
+          }
+          return Value(std::move(values));
+     }
      case NodeType::Identifier:
      {
           auto val = get_variable(node->value);
@@ -119,11 +133,7 @@ Runner::Value Runner::execute_for(const std::shared_ptr<ASTNode> &node)
 
      if (first->type == NodeType::While)
      {
-          while (is_true(execute(first->children[0])))
-          {
-               execute_block(body);
-          }
-          return Value();
+          execute_while(first, body);
      }
      else if (first->type == NodeType::ForLoop)
      {
@@ -142,28 +152,41 @@ Runner::Value Runner::execute_for(const std::shared_ptr<ASTNode> &node)
 
           std::string var_name = var_node->value;
 
-          while (true)
-          {
-               Value current = get_variable(var_name);
-               Value limit = execute(first->children[1]);
-
-               if (!current.is_number() || !limit.is_number())
-               {
-                    throw std::runtime_error("Loop bounds must be numeric types. Got: current = " + current.to_string() + ", limit = " + limit.to_string());
-               }
-
-               if (!(current.int_val < limit.int_val))
-                    break;
-
-               execute_block(body);
-
-               set_variable(var_name, Value(current.int_val + 1));
-          }
-
-          return Value();
+          return execute_for_loop(body, first->children[1], var_name);
      }
 
      throw std::runtime_error("Invalid for-loop structure");
+}
+
+Runner::Value Runner::execute_for_loop(const std::shared_ptr<ASTNode> &body, const std::shared_ptr<ASTNode> &lim, std::string var_name)
+{
+     while (true)
+     {
+          Value current = get_variable(var_name);
+          Value limit = execute(lim);
+
+          if (!current.is_number() || !limit.is_number())
+          {
+               throw std::runtime_error("Loop bounds must be numeric types. Got: current = " + current.to_string() + ", limit = " + limit.to_string());
+          }
+
+          if (!(current.int_val < limit.int_val))
+               break;
+
+          execute_block(body);
+
+          set_variable(var_name, Value(current.int_val + 1));
+     }
+     return Value();
+}
+
+Runner::Value Runner::execute_while(const std::shared_ptr<ASTNode> &expression, const std::shared_ptr<ASTNode> &body)
+{
+     while (is_true(execute(expression)))
+     {
+          execute_block(body);
+     }
+     return Value();
 }
 
 bool Runner::has_variable_in_current_scope(const std::string &name)
@@ -313,6 +336,8 @@ bool Runner::matches_type(const Value &val, const std::string &expected_type)
           return val.type == Value::Type::String;
      if (expected_type == "bool")
           return val.type == Value::Type::Bool;
+     if (expected_type == "arr")
+          return val.type == Value::Type::Array;
      return false;
 }
 
