@@ -2,10 +2,16 @@
 #include <memory>
 #include <vector>
 #include "value.hpp"
-#include "scope.hpp"
 #include <parser.hpp>
+#include "scope_manager.hpp"
 
 class FunctionManager;
+
+struct ReturnSignal
+{
+     Value value;
+     explicit ReturnSignal(Value v) : value(std::move(v)) {}
+};
 
 class Evaluator
 {
@@ -17,12 +23,13 @@ public:
 
      void push_scope();
      void pop_scope();
-     Value get_variable(const std::string &name);
+
      void define_variable(const std::string &name, const Value &value);
      void set_variable(const std::string &name, const Value &value);
+     Value get_variable(const std::string &name) const;
 
 private:
-     std::vector<Scope> scopes;
+     ScopeManager scope_mgr;
      FunctionManager &function_manager;
 
      Value eval_binary_op(const std::string &op, const Value &lhs, const Value &rhs);

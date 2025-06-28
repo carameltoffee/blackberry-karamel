@@ -34,4 +34,5 @@ public:
      bool is_number() const;
      std::string to_string() const;
      void check_type(Type expected) const;
+     static Type string_to_type(const std::string &type_str);
 };

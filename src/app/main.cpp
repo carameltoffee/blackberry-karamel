@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 #include "parser.hpp"
 #include <iostream>
-#include <runner.hpp>
+#include <interpreter/interpreter.hpp>
 
 std::string Token::to_string() const
 {
@@ -97,14 +97,16 @@ fn silly(s: str) (
 
 x = [15, 2, 3, 4];
 cout(x);
+cout(mul_nums(3.0, 2));
+cout(fact(5));
 silly('mememememe');
 )";
 
      Lexer lexer(code);
      Parser parser(lexer);
-     Runner runner;
+     Interpreter interpreter;
      auto ast = parser.parse();
-     runner.interpret(ast);
+     interpreter.interpret(ast);
 
      return 0;
 }

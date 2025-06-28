@@ -78,7 +78,7 @@ std::vector<std::shared_ptr<ASTNode>> Parser::parse()
      while (!match(TokenType::EndOfFile))
      {
           auto node = parse_statement();
-          // print_ast(node);
+          print_ast(node);
           nodes.push_back(node);
      }
      return nodes;

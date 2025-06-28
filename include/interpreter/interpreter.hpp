@@ -4,15 +4,14 @@
 #include "evaluator.hpp"
 #include "function_manager.hpp"
 
-class Runner
+class Interpreter
 {
 public:
+     Interpreter();
+
      void interpret(const std::vector<std::shared_ptr<ASTNode>> &nodes);
 
 private:
      FunctionManager function_manager;
      Evaluator evaluator;
-
-public:
-     Runner();
 };

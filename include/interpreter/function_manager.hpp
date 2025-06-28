@@ -1,20 +1,26 @@
 #pragma once
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <memory>
 #include <vector>
+#include <functional>
 #include "value.hpp"
-#include "evaluator.hpp"
+
+class Evaluator;
+class ASTNode;
 
 class FunctionManager
 {
 public:
-     void register_function(const std::string &name, std::shared_ptr<ASTNode> decl);
+     using NativeFunc = std::function<Value(const std::vector<Value> &)>;
+
+     void register_function(const std::string &name, const std::shared_ptr<ASTNode> &func_def);
+     void register_native(const std::string &name, NativeFunc func);
      Value call(const std::string &name, const std::vector<std::shared_ptr<ASTNode>> &args, Evaluator &evaluator);
 
 private:
-     std::unordered_map<std::string, std::shared_ptr<ASTNode>> functions;
+     std::unordered_map<std::string, std::shared_ptr<ASTNode>> user_functions;
+     std::unordered_map<std::string, NativeFunc> native_functions;
 
-     bool matches_type(const Value &val, const std::string &expected_type);
-     std::pair<std::string, std::string> extract_name_and_type(const std::string &s);
+     std::vector<Value> evaluate_args(const std::vector<std::shared_ptr<ASTNode>> &args, Evaluator &evaluator);
 };
