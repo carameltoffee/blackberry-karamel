@@ -25,9 +25,7 @@ std::pair<std::string, std::string> extract_name_and_type(const std::string &s)
 {
      auto pos = s.find(':');
      if (pos == std::string::npos || pos + 1 >= s.size())
-          std::cout << s;
-          std::exit(1);
-          // throw std::runtime_error("Malformed type annotation: " + s);
+          throw std::runtime_error("Malformed type annotation: " + s);
 
      std::string name = s.substr(0, pos);
      std::string type = s.substr(pos + 1);

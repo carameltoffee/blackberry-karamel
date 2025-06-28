@@ -17,6 +17,7 @@ enum class NodeType
      String,
      Boolean,
      Array,
+     ArrayItem,
      BinaryOp,
      Assignment,
      ParamList,

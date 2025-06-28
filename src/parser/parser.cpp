@@ -57,6 +57,8 @@ std::string node_type_to_string(NodeType type)
           return "ParamList";
      case NodeType::Array:
           return "Array";
+     case NodeType::ArrayItem:
+          return "ArrayItem";
      default:
           return "???";
      }
@@ -78,7 +80,7 @@ std::vector<std::shared_ptr<ASTNode>> Parser::parse()
      while (!match(TokenType::EndOfFile))
      {
           auto node = parse_statement();
-          print_ast(node);
+          // print_ast(node);
           nodes.push_back(node);
      }
      return nodes;
@@ -231,6 +233,16 @@ std::shared_ptr<ASTNode> Parser::parse_expression()
           assign->children.push_back(left);
           assign->children.push_back(parse_expression());
           return assign;
+     }
+
+     if (left->type == NodeType::Identifier && match(TokenType::Punctuation, "["))
+     {
+          advance();
+          auto item = std::make_shared<ASTNode>(NodeType::ArrayItem, "");
+          item->children.push_back(left);
+          item->children.push_back(parse_expression());
+          expect(TokenType::Punctuation, "]");
+          return item;
      }
 
      while (true)

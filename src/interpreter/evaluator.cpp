@@ -62,6 +62,12 @@ Value Evaluator::evaluate(const std::shared_ptr<ASTNode> &node)
           return Value(node->value);
      case NodeType::Boolean:
           return Value(node->value == "true");
+     case NodeType::ArrayItem:
+     {
+          auto arr = scope_mgr.get(node->children[0]->value);
+          auto be = evaluate(node->children[1]);
+          return arr.array_val[be.int_val];
+     }
      case NodeType::Array:
      {
           std::vector<Value> vals;
@@ -160,6 +166,10 @@ Value Evaluator::execute_for_loop(const std::shared_ptr<ASTNode> &body,
           Value current = scope_mgr.get(var_name);
           Value max_val = evaluate(limit);
 
+          if (max_val.is_array())
+          {
+               max_val = Value(static_cast<int>(max_val.array_val.size()));
+          }
           if (!current.is_number() || !max_val.is_number())
                throw std::runtime_error("Loop bounds must be numeric");
 

@@ -82,7 +82,7 @@ int main()
     return (x+y)*2;
 )
 
-fn fact(n: num) (
+fn fact(n: num) num (
     if (n <= 1) (
         return 1;
     )
@@ -96,9 +96,15 @@ fn silly(s: str) (
 )
 
 x = [15, 2, 3, 4];
+
+for(i=0; x) (
+     cout(x[i]);
+)
+
 cout(x);
 cout(mul_nums(3.0, 2));
 cout(fact(5));
+cout(x[0]);
 silly('mememememe');
 )";
 

@@ -64,3 +64,8 @@ Value::Type Value::string_to_type(const std::string &type_str)
           return Type::Array;
      throw std::runtime_error("Unknown type: " + type_str);
 }
+
+bool Value::is_array() const
+{
+     return type == Type::Array;
+}
